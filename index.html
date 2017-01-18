@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html ng-app="mainApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Магазин</title>
+    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/tcal.css">
+    <script type="text/javascript" src="scripts/lib/angular.min.js"></script>
+    <script type="text/javascript" src="scripts/lib/angular-translate.min.js"></script>
+    <script type="text/javascript" src="scripts/lib/angular-animate.min.js"></script>
+    <script type="text/javascript" src="scripts/lib/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="scripts/lib/tcal.js"></script>
+    <script type="text/javascript" src="scripts/script.js"></script>
+    <script type="text/javascript" src="scripts/controllers/mainCtrl.js"></script>
+    <script type="text/javascript" src="scripts/controllers/modalCtrl.js"></script>
+    <script type="text/javascript" src="scripts/controllers/basketCtrl.js"></script>
+</head>
+<body>
+    <div class="container" ng-controller="mainCtrl">
+       
+        <div class="opacity"></div>
+        <div class="modal" ng-controller="modalCtrl">
+            <span id="modal-close">X</span>
+            <div class="name"> {{ currentProduct.name }} </div>
+            <div class="big-image">
+                <img ng-src="{{currentImage}}" alt="Главное фото">
+            </div>
+            <div class="images-slider">
+                <span class="before"></span>
+                <div class="image-slider" ng-repeat="image in currentProduct.image" ng-click="chooseImage(image)">
+                    <img ng-src="{{image}}" alt="Фото">
+                </div>
+            </div>
+            <div class="characteristics">
+                <table>
+                    <tr ng-repeat="characteristic in currentProduct.characteristic">
+                        <td> {{ characteristic.name }} </td>
+                        <td> {{ characteristic.value }} </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="buy">
+                <table>
+                    <tr>
+                        <td>Выберете магазин:</td>
+                        <td>
+                            <select name="shops" id="shops" ng-options="shop as shop.name for shop in shops track by shop.name" ng-model="currentShop" 
+                               ng-change="chooseShop()">
+                                
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Скидка: {{currentShop.sale * 100}}%</td>
+                        <td>Цена: {{cost}}; Цена с учётом скидки: {{cost * (1 - currentShop.sale)}}</td>
+                    </tr>
+                    <tr>
+                        <td>Выберете предпочитаемую дату доставки: </td>
+                        <td>
+                            <input id="date" type="text" name="date" class="tcal" value="" ng-model="currentDate" ng-click="chooseDate()">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Выберете количество: <input id="count" type="text" value="1"></td>
+                        <td>Всего в наличии: {{ count }} </td>
+                    </tr>
+                </table>
+                <div class="info">{{ info }}</div>
+                <div class="button">
+                    <img src="images/basketNotEmpty.png" alt="Купить" ng-click="buy()">
+                </div>
+            </div>
+        </div>
+        
+        <div class="basket-items" ng-controller="basketCtrl">
+            <span id="modal-close-2">X</span>
+            <div class="name">Корзина</div>
+            <div class="item-basket" ng-repeat="item in items" ng-style="setBackGround(item)">
+                <p class="name-product"> {{ item.name }}</p>
+                <p>Цена: {{ item.price }}</p>
+                <p>Дата доставки: {{ item.day }}.{{ +item.month + 1 }}.{{ item.year }}</p>
+            </div>
+        </div>
+        
+        <div class="logo">
+            <span class="before"></span>
+            <img id="logo" src="images/logo1.png" alt="Логотип">
+        </div>
+       
+        <div class="header">
+            <div class="welcome">
+                <div class="top-logo">
+                    <a href="#"><img src="images/logo1.png" alt="Логотип"></a>
+                </div>
+                <div class="top-text">
+                    <span class="before"></span>
+                    Добро пожалвать!
+                </div>
+            </div>
+            <div class="functional">
+                <div class="basket">
+                    <span class="before"></span>
+                    <img ng-src="{{ pathToBasketImage }}" alt="Корзина" ng-click="chooseBasket()">
+                </div>
+                <div class="basket-info">
+                    <span class="before"></span>
+                    <img id="to-basket" src="images/toBasket.png" alt="В корзину">
+                </div>
+                <div class="today">
+                    <span class="before"></span>
+                    <p>Сегодня одна из покупок будет доставлена!</p>
+                </div>
+            </div>
+            <div class="slider">
+                <span class="before"></span>
+                <div class="category-slider" ng-repeat="category in categoriesSlider" ng-click="chooseCategory(category, $event)">{{ category.name }}</div>
+            </div>
+            <img class="arrow" src="images/arrowSlider.png" ng-click="showOrHideSlider()" alt="Up/Down">
+        </div>
+        
+        <div class="filters">
+            <div class="nameFilter">Фильтры</div>
+            <div class="input-text">
+                <label for="filterName">Название</label><br>
+                <input type="text" id="filterName" ng-model="f.name">
+            </div>
+            <div class="input-text">
+                <label for="filterBrand">Производитель</label><br>
+                <input type="text" id="filterBrand" ng-model="f.brand">
+            </div>
+            <div class="input-text">
+                <label for="filterYear">Год выпуска</label><br>
+                <input type="text" id="filterYear" ng-model="f.year">
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="categories-list">
+                <div class="category-list" ng-repeat="category in categories" ng-click="clickListCategory(category)">{{ category.name }}</div>
+            </div>
+            <div class="product" ng-repeat="product in productList | filter:f" ng-click="chooseProduct(product, $event)">
+                <div class="product-photo">
+                    <img ng-src="{{product.image[0]}}" alt="Фото">
+                </div>
+                <div class="product-description">
+                    <p id="productName">{{ product.name }}</p>
+                    <p id="productName">Производитель: {{ product.brand }}</p>
+                    <p id="productName">Год выпуска: {{ product.year }}</p>
+                    <p id="productDescription">{{ product.description }}</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="to-top">
+        <img src="images/toTop.png" alt="Наверх">
+    </div>
+    
+    <div class="spinner">
+        <p>Получение данных...</p>
+    </div>
+</body>
+</html>
